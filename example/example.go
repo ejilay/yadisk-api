@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	yadisk "../"
+	"github.com/ejilay/yadisk-api"
 )
 
 func main() {
