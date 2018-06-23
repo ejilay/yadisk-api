@@ -15,10 +15,10 @@ type API struct {
 }
 
 // NewAPI constructs a new YaDisk API object.
-func NewAPI(oAuthToken string) *API {
+func NewAPI(oAuthToken string, client *http.Client) *API {
 	return &API{
 		oAuthToken,
-		http.DefaultClient,
+		client,
 	}
 }
 
