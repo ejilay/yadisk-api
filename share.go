@@ -14,7 +14,7 @@ type ShareResponse struct {
 }
 
 // Share will put specified data to Yandex.Disk.
-func (a *API) Share(data io.Reader, remotePath string) (ShareResponse, error) {
+func (a *API) Share(remotePath string) (ShareResponse, error) {
 	ur, err := a.ShareRequest(remotePath)
 	if err != nil {
 		return ur, err
