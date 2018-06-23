@@ -58,7 +58,7 @@ func ParseShareResponse(data io.Reader) (ShareResponse, error) {
 	if err := dec.Decode(&ur); err == io.EOF {
 		// ok
 	} else if err != nil {
-		return nil, err
+		return ur, err
 	}
 
 	// TODO: check if there is any trash data after JSON and crash if there is.
