@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/ejilay/yadisk-api"
+	"net/http"
+	"time"
 )
 
 func main() {
@@ -32,7 +34,10 @@ func main() {
 	oAuthToken := flag.Arg(0)
 	fmt.Printf("Using token \"%s\"...\n", oAuthToken)
 
-	api := yadisk.NewAPI(oAuthToken)
+	client := &http.Client{
+		Timeout: 600 * time.Second, // example
+	}
+	api := yadisk.NewAPI(oAuthToken, client)
 
 	reader := strings.NewReader("TEST")
 	err := api.Upload(reader, "app:/test.txt", true)

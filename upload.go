@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-// UploadResponse struct is returned by the API for upload request.
+// ShareResponse struct is returned by the API for upload request.
 type UploadResponse struct {
 	HRef      string `json:"href"`
 	Method    string `json:"method"`
@@ -56,7 +56,7 @@ func (a *API) UploadRequest(remotePath string, overwrite bool) (*UploadResponse,
 	return ur, nil
 }
 
-// ParseUploadResponse tries to read and parse UploadResponse struct.
+// ParseUploadResponse tries to read and parse ShareResponse struct.
 func ParseUploadResponse(data io.Reader) (*UploadResponse, error) {
 	dec := json.NewDecoder(data)
 	var ur UploadResponse
