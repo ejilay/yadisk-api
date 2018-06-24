@@ -21,7 +21,7 @@ func (a *API) Upload(data io.Reader, remotePath string, overwrite bool) error {
 		return err
 	}
 
-	if err := PerformUpload(ur.HRef, data); err != nil {
+	if err := PerformUpload(ur.HRef, data, a.HTTPClient); err != nil {
 		return err
 	}
 
@@ -29,45 +29,45 @@ func (a *API) Upload(data io.Reader, remotePath string, overwrite bool) error {
 }
 
 // UploadRequest will make an upload request and return a URL to upload data to.
-func (a *API) UploadRequest(remotePath string, overwrite bool) (*UploadResponse, error) {
+func (a *API) UploadRequest(remotePath string, overwrite bool) (UploadResponse, error) {
 	values := url.Values{}
 	values.Add("path", remotePath)
 	values.Add("overwrite", strconv.FormatBool(overwrite))
 
 	req, err := a.scopedRequest("GET", "/v1/disk/resources/upload?"+values.Encode(), nil)
 	if err != nil {
-		return nil, err
+		return UploadResponse{}, err
 	}
 
 	resp, err := a.HTTPClient.Do(req)
 	if err != nil {
-		return nil, err
+		return UploadResponse{}, err
 	}
 	if err := CheckAPIError(resp); err != nil {
-		return nil, err
+		return UploadResponse{}, err
 	}
 
 	defer resp.Body.Close()
 	ur, err := ParseUploadResponse(resp.Body)
 	if err != nil {
-		return nil, err
+		return UploadResponse{}, err
 	}
 
 	return ur, nil
 }
 
 // ParseUploadResponse tries to read and parse ShareResponse struct.
-func ParseUploadResponse(data io.Reader) (*UploadResponse, error) {
+func ParseUploadResponse(data io.Reader) (UploadResponse, error) {
 	dec := json.NewDecoder(data)
 	var ur UploadResponse
 
 	if err := dec.Decode(&ur); err == io.EOF {
 		// ok
 	} else if err != nil {
-		return nil, err
+		return ur, err
 	}
 
 	// TODO: check if there is any trash data after JSON and crash if there is.
 
-	return &ur, nil
+	return ur, nil
 }

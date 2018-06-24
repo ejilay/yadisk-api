@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/url"
+	"fmt"
 )
 
 // ShareResponse struct is returned by the API for upload request.
@@ -14,7 +15,7 @@ type ShareResponse struct {
 }
 
 // Share will put specified data to Yandex.Disk.
-func (a *API) Share(remotePath string) (ShareResponse, error) {
+func (a *API) Share(remotePath string) (string, error) {
 	ur, err := a.ShareRequest(remotePath)
 	if err != nil {
 		return ur, err
@@ -24,30 +25,32 @@ func (a *API) Share(remotePath string) (ShareResponse, error) {
 }
 
 // ShareRequest will make an share request and return a URL to upload data to.
-func (a *API) ShareRequest(remotePath string) (ShareResponse, error) {
+func (a *API) ShareRequest(remotePath string) (string, error) {
 	values := url.Values{}
 	values.Add("path", remotePath)
 
 	req, err := a.scopedRequest("PUT", "/v1/disk/resources/publish?"+values.Encode(), nil)
 	if err != nil {
-		return ShareResponse{}, err
+		return "", err
 	}
 
 	resp, err := a.HTTPClient.Do(req)
 	if err != nil {
-		return ShareResponse{}, err
+		return "", err
 	}
 	if err := CheckAPIError(resp); err != nil {
-		return ShareResponse{}, err
+		return "", err
 	}
 
 	defer resp.Body.Close()
-	ur, err := ParseShareResponse(resp.Body)
+	ur, err := a.GetMeta(remotePath)
 	if err != nil {
-		return ShareResponse{}, err
+		return "", err
 	}
-
-	return ur, nil
+	if ur.PublicURL == nil {
+		return "", fmt.Errorf("unable to publish %q", remotePath)
+	}
+	return *ur.PublicURL, nil
 }
 
 // ParseUploadResponse tries to read and parse ShareResponse struct.
